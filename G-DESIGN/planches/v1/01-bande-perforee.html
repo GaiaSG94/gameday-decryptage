@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Décryptage · V1 · 01 Bande perforée</title>
+<style>
+/* ============ Planche (neutre, identique sur les 3 directions) ============ */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#e4e3df;color:#1b1b1a;font:13px/1.45 "Helvetica Neue",Helvetica,Arial,"Liberation Sans",sans-serif}
+.board{padding:28px 32px 40px}
+.meta{display:grid;grid-template-columns:260px 1fr 300px 320px;gap:32px;border-top:1px solid #1b1b1a;padding-top:14px;margin-bottom:28px}
+.meta h1{font-size:28px;font-weight:400;letter-spacing:-.02em;line-height:1.05}
+.meta h1 small{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#77756f;margin-bottom:8px}
+.meta h2{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#77756f;margin-bottom:8px}
+.meta p{max-width:58ch}
+.sw{display:flex;gap:6px;flex-wrap:wrap}
+.sw div{width:64px;font:10px/1.3 ui-monospace,"IBM Plex Mono","DejaVu Sans Mono",monospace;color:#55534e}
+.sw i{display:block;height:40px;border:1px solid rgba(0,0,0,.12);margin-bottom:4px}
+.spec{font-size:11px;color:#55534e}
+.spec b{display:block;font-weight:400;color:#1b1b1a}
+.legend{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+.legend figure{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10px;color:#55534e}
+.stagebar{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;color:#77756f;margin-bottom:10px}
+.stagebar button{font:inherit;color:#1b1b1a;background:none;border:1px solid #1b1b1a;border-radius:99px;padding:3px 10px;cursor:pointer}
+.stage{position:relative;overflow:hidden}
+.frames{display:flex;gap:48px;align-items:flex-start;transform-origin:0 0;width:1878px}
+.frame-cap{font-size:11px;color:#77756f;margin-top:8px}
+
+/* ============ Chrome Reddit neutre (pas de logo, pas de marque) ============ */
+.desk{width:1440px;height:900px;background:#fff;position:relative;overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.08),0 20px 50px -20px rgba(0,0,0,.25);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:#1c1c1c}
+.desk .top{height:56px;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;gap:16px;padding:0 20px}
+.ph-dot{width:32px;height:32px;border-radius:50%;background:#e7e7e5}
+.ph-bar{height:10px;border-radius:5px;background:#e7e7e5}
+.search{flex:0 0 560px;margin:0 auto;height:38px;border-radius:19px;background:#f1f1ef;display:flex;align-items:center;padding:0 16px;color:#8a8a85;font-size:14px}
+.desk .body{display:grid;grid-template-columns:272px 1fr 316px;height:844px}
+.rail{border-right:1px solid #e5e5e5;padding:18px 16px;display:flex;flex-direction:column;gap:14px;font-size:14px;color:#3c3c3c}
+.rail .sep{height:1px;background:#e5e5e5;margin:4px 0}
+.rail .cap{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8a8a85}
+.feed{padding:16px 0;display:flex;justify-content:center}
+.post{width:756px;padding:10px 16px;border-radius:12px}
+.post .ph{display:flex;align-items:center;gap:8px;font-size:12px;color:#5c5c5c}
+.post .ph .av{width:24px;height:24px;border-radius:50%}
+.post .ph b{color:#1c1c1c;font-weight:600}
+.post h3{font-size:18px;font-weight:600;margin:8px 0 10px;letter-spacing:-.01em}
+.embed{width:724px;height:640px;border-radius:10px;overflow:hidden;position:relative;border:1px solid #e5e5e5}
+.acts{display:flex;gap:8px;margin-top:10px}
+.pill{height:32px;border-radius:16px;background:#f1f1ef;display:flex;align-items:center;gap:8px;padding:0 12px;font-size:12px;font-weight:600;color:#3c3c3c}
+.pill svg{width:14px;height:14px}
+.side{padding:16px 20px}
+.card{border-radius:12px;background:#f6f6f4;padding:14px;font-size:12px;color:#3c3c3c;display:flex;flex-direction:column;gap:8px}
+.card b{font-size:14px;color:#1c1c1c}
+.mob{width:390px;height:844px;background:#000;border-radius:44px;padding:0;position:relative;overflow:hidden;box-shadow:0 20px 50px -20px rgba(0,0,0,.35);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
+.mob .status{height:44px;display:flex;justify-content:space-between;align-items:center;padding:0 28px 0 34px;font-size:15px;font-weight:600}
+.mob .bar{height:48px;display:flex;align-items:center;gap:12px;padding:0 14px;font-size:13px}
+.mob .bar .x{width:28px;height:28px;border-radius:50%;display:grid;place-items:center}
+.mob .bar .t{flex:1;line-height:1.15}
+.mob .bar .t b{display:block;font-size:14px}
+.mob .screen{position:absolute;left:0;right:0;top:92px;bottom:0}
+
+/* ============ DIRECTION 01 — BANDE PERFORÉE ============ */
+:root{
+  --paper:#efe7d3; --paper-2:#f7f1e3; --paper-3:#e3d9c1;
+  --machine:#2a2e33; --machine-2:#3a3f45; --machine-3:#555b62;
+  --red:#8b1e1e;
+  --ink:#2a2e33; --muted:#7d776a; --hair:#cfc4a9;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,"DejaVu Sans Mono",monospace;
+  --sans:"Inter","Helvetica Neue",Helvetica,Arial,"Liberation Sans",sans-serif;
+}
+.mob{background:var(--paper)}
+.mob .status,.mob .bar{color:var(--ink)}
+.mob .bar{border-bottom:1px solid var(--hair)}
+.mob .bar .t span{color:var(--muted);font-size:12px}
+
+.g{position:absolute;inset:0;background:var(--paper);color:var(--ink);font-family:var(--sans);display:flex;flex-direction:column}
+.g-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 0}
+.wm{font:600 13px/1 var(--mono);letter-spacing:.32em}
+.wm em{font-style:normal;color:var(--red)}
+.stats{display:flex;gap:16px;align-items:center;font:500 12px/1 var(--mono);color:var(--muted)}
+.stats b{color:var(--ink);font-weight:600}
+.streak{display:flex;align-items:center;gap:6px}
+.streak .h{display:flex;gap:3px}
+.streak .h i{width:6px;height:6px;border-radius:50%;border:1px solid var(--ink)}
+.streak .h i.p{background:var(--ink)}
+.streak .h i.today{border-color:var(--red);border-style:dashed}
+.g-rule{padding:10px 16px 0;font-size:13px;line-height:1.4;color:var(--muted)}
+.g-rule b{color:var(--ink);font-weight:500}
+.g-rule .d{font:500 10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);display:block;margin-bottom:6px}
+
+/* bande */
+.deck{margin-top:14px;background:var(--machine);padding:14px 0 16px;position:relative}
+.deck:before,.deck:after{content:"";position:absolute;left:0;right:0;height:1px;background:var(--machine-3);top:6px}
+.deck:after{top:auto;bottom:6px}
+.tape{background:var(--paper-2);margin:0 8px;padding:10px 6px 0;display:flex;justify-content:center;position:relative;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.04)}
+.tape:before{ /* bord dentelé discret */
+  content:"";position:absolute;left:0;right:0;top:-3px;height:3px;
+  background:radial-gradient(circle at 3px 0,transparent 2px,var(--paper-2) 2.5px) 0 0/6px 3px repeat-x}
+.col{width:var(--col);display:flex;flex-direction:column;align-items:center;cursor:pointer;position:relative}
+.col.gap{cursor:default}
+.holes{display:flex;flex-direction:column;align-items:center;gap:var(--hg);padding-bottom:6px}
+.holes i{width:var(--hole);height:var(--hole);border-radius:50%;border:1px solid var(--paper-3)}
+.holes i.p{background:var(--machine);border-color:var(--machine)}
+.holes i.fh{width:calc(var(--hole)*.55);height:calc(var(--hole)*.55);background:var(--paper-3);border:0}
+.col.sel .holes i.p{background:var(--red);border-color:var(--red)}
+.ct{font:500 var(--cfs)/1 var(--mono);text-transform:uppercase;color:var(--muted);padding:2px 0 8px}
+.col.sel .ct{color:var(--red)}
+.slot{width:calc(var(--col) - 6px);height:var(--slot);margin-bottom:10px;display:grid;place-items:center;
+  font:600 var(--pfs)/1 var(--mono);text-transform:uppercase;color:var(--ink);border-bottom:2px solid var(--machine);position:relative}
+.slot.empty{border-bottom:2px dotted var(--machine-3)}
+.slot.given{background:var(--paper-3);border-bottom-color:transparent}
+.slot.given:after{content:"";position:absolute;top:3px;right:3px;width:4px;height:4px;border-radius:50%;background:var(--machine)}
+.slot.sel{border:2px solid var(--red);border-radius:2px}
+.slot.sel:before{content:"";width:2px;height:55%;background:var(--red);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.col.gap .ct,.col.gap .slot{visibility:hidden}
+
+.under{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 0;font:500 11px/1 var(--mono);color:var(--muted);gap:8px}
+.keys{display:flex;gap:6px;flex-wrap:wrap}
+.keys span{border:1px solid var(--hair);border-radius:3px;padding:5px 7px;text-transform:uppercase;color:var(--ink);background:var(--paper-2)}
+.keys span b{color:var(--muted);font-weight:500;margin:0 4px}
+
+/* clavier machine */
+.pad{margin-top:auto;background:var(--machine);padding:16px 16px 34px;border-radius:14px 14px 0 0;color:var(--paper)}
+.pad-h{display:flex;justify-content:space-between;align-items:baseline;font:500 11px/1 var(--mono);color:#a9a28f;margin-bottom:12px}
+.pad-h b{font-size:15px;color:var(--paper);font-weight:600;letter-spacing:.06em}
+.pad-h b em{font-style:normal;color:#e7b3a6}
+.rows{display:flex;flex-direction:column;gap:8px;align-items:center}
+.row{display:flex;gap:var(--kg)}
+.k{width:var(--key);height:var(--key);border-radius:50%;background:var(--paper);color:var(--ink);display:grid;place-items:center;
+  font:600 calc(var(--key)*.4)/1 var(--mono);text-transform:uppercase;position:relative;
+  box-shadow:0 0 0 2px var(--machine),0 0 0 3px var(--machine-3),0 3px 0 3px #1c1f23}
+.k sub{position:absolute;bottom:-1px;right:-3px;font:600 9px/1 var(--mono);background:var(--red);color:#fff;border-radius:6px;padding:2px 3px;text-transform:uppercase}
+.k.used{background:#c9c0a8;color:#6a6456}
+.k.given{background:var(--machine-2);color:#8e877a;box-shadow:0 0 0 2px var(--machine),0 0 0 3px var(--machine-3)}
+.k.given sub{background:var(--machine-3)}
+.k.hot{background:#fff;box-shadow:0 0 0 2px var(--machine),0 0 0 3px var(--red),0 3px 0 3px #1c1f23}
+.go{display:flex;gap:10px;margin-top:16px}
+.btn{height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;font:600 13px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase}
+.btn.ghost{flex:0 0 96px;border:1px solid var(--machine-3);color:#c9c0a8}
+.btn.main{flex:1;background:var(--paper);color:var(--machine)}
+.btn.main span{font:500 11px/1 var(--mono);letter-spacing:.04em;color:var(--red);text-transform:none;margin-left:10px}
+
+/* tailles par cadre */
+.g--m{--col:30px;--hole:8px;--hg:5px;--cfs:14px;--pfs:22px;--slot:42px;--key:34px;--kg:6px}
+.g--m .deck{margin-top:auto;padding:18px 0 20px}
+.g--m .tape{padding-top:14px}
+.g--m .under{padding-top:16px}
+.g--m .rows{gap:11px}
+.g--m .go{margin-top:20px}
+.g--m .btn{height:52px;border-radius:26px}
+.g--d{--col:46px;--hole:9px;--hg:5px;--cfs:16px;--pfs:28px;--slot:46px;--key:38px;--kg:10px}
+.g--d .g-head{padding:20px 28px 0}
+.g--d .g-rule{padding:12px 28px 0;font-size:14px}
+.g--d .deck{margin-top:22px}
+.g--d .tape{margin:0 28px;padding-top:14px}
+.g--d .under{padding:14px 28px 0}
+.g--d .pad{margin:auto 28px 0;padding:16px 28px 22px}
+.g--d .go{max-width:440px;margin:16px auto 0}
+
+@media (prefers-reduced-motion:reduce){.slot.sel:before{animation:none}}
+</style>
+</head>
+<body>
+<div class="board">
+
+  <section class="meta">
+    <div>
+      <h1><small>Décryptage · V1 · page Jeu · 2026-11-18</small>01 — Bande perforée</h1>
+    </div>
+    <div>
+      <h2>Pourquoi</h2>
+      <p>Le message arrive comme une bande de téléscripteur : chaque lettre a sa colonne de trous, et la case en dessous attend sa lettre en clair. On garde la direction de départ (papier, machine, rouge de perforation) parce qu'elle explique le jeu sans un mot : on lit la bande, on remplit les cases. Le clavier rond sous la bande sert aussi d'alphabet de substitution : chaque touche montre à quelle lettre chiffrée elle est déjà liée.</p>
+    </div>
+    <div>
+      <h2>Palette · un seul accent</h2>
+      <div class="sw">
+        <div><i style="background:#efe7d3"></i>Bande<br>#efe7d3</div>
+        <div><i style="background:#f7f1e3"></i>Bande clair<br>#f7f1e3</div>
+        <div><i style="background:#2a2e33"></i>Machine<br>#2a2e33</div>
+        <div><i style="background:#7d776a"></i>Gris<br>#7d776a</div>
+        <div><i style="background:#8b1e1e"></i>Perforation<br>#8b1e1e</div>
+      </div>
+      <h2 style="margin-top:14px">Typo</h2>
+      <div class="spec"><b style="font:600 18px/1.2 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.06em">RZUF QZSKBKI</b>Mono (IBM Plex Mono, OFL) : texte chiffré, compteurs<br><b style="font-size:15px;margin-top:6px">Tap a letter, then pick its match.</b>Sans (Inter, OFL) : consignes, boutons</div>
+    </div>
+    <div>
+      <h2>États d'une case</h2>
+      <div class="legend g--m" style="--col:40px;--slot:40px;--pfs:20px">
+        <figure><div class="slot empty" style="width:34px;margin:0"></div>vide</figure>
+        <figure><div class="slot given" style="width:34px;margin:0">C</div>donnée</figure>
+        <figure><div class="slot" style="width:34px;margin:0">R</div>posée</figure>
+        <figure><div class="slot sel" style="width:34px;margin:0"></div>sélection</figure>
+      </div>
+      <p class="spec" style="margin-top:10px">Toucher une lettre chiffrée la sélectionne (trous en rouge) ; toucher une touche pose la lettre dans toutes ses occurrences. Touche grisée = déjà prise, l'étiquette rouge dit par quelle lettre.</p>
+    </div>
+  </section>
+
+  <div class="stagebar"><span>Desktop 1440 × 900 (post dans le feed, zone de jeu 724 × 640) · Mobile 390 × 844 (vue de jeu plein écran)</span><button id="zoom">Taille réelle</button></div>
+  <div class="stage" id="stage">
+    <div class="frames" id="frames">
+      <div>
+        <div class="desk">
+          <div class="top"><div class="ph-dot"></div><div class="ph-bar" style="width:72px"></div><div class="search">Search</div><div class="ph-dot"></div><div class="ph-dot"></div></div>
+          <div class="body">
+            <aside class="rail"><span>Home</span><span>Popular</span><span>Explore</span><div class="sep"></div><span class="cap">Communities</span><span>r/decryptage</span><span style="color:#8a8a85">r/wordgames</span><span style="color:#8a8a85">r/puzzles</span></aside>
+            <main class="feed">
+              <article class="post">
+                <div class="ph"><span class="av" style="background:var(--machine)"></span><b>r/decryptage</b><span>· 3 h</span></div>
+                <h3>Today's intercept · 18 Nov</h3>
+                <div class="embed"><div class="g g--d" data-game></div></div>
+                <div class="acts">
+                  <span class="pill"><svg viewBox="0 0 14 14"><path d="M7 2 12 8H9v4H5V8H2z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>1.2k<svg viewBox="0 0 14 14"><path d="M7 12 2 6h3V2h4v4h3z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>
+                  <span class="pill"><svg viewBox="0 0 14 14"><path d="M2 3h10v7H6l-3 2v-2H2z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>214</span>
+                  <span class="pill">Share</span>
+                </div>
+              </article>
+            </main>
+            <aside class="side"><div class="card"><b>r/decryptage</b>One intercepted message a day. Same cipher for everyone.<div class="ph-bar" style="width:60%"></div></div></aside>
+          </div>
+        </div>
+        <div class="frame-cap">Desktop · post dans le feed</div>
+      </div>
+      <div>
+        <div class="mob">
+          <div class="status"><span>9:41</span><span style="display:flex;gap:4px;align-items:flex-end"><i style="width:3px;height:5px;background:currentColor"></i><i style="width:3px;height:7px;background:currentColor"></i><i style="width:3px;height:9px;background:currentColor"></i><i style="width:3px;height:11px;background:currentColor"></i><i style="width:22px;height:11px;border:1.5px solid currentColor;border-radius:3px;margin-left:6px"></i></span></div>
+          <div class="bar"><span class="x"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 2l10 10M12 2 2 12" stroke="currentColor" stroke-width="1.6"/></svg></span><span class="t"><b>Today's intercept · 18 Nov</b><span>r/decryptage</span></span><span class="x"><svg width="16" height="4" viewBox="0 0 16 4"><circle cx="2" cy="2" r="1.6" fill="currentColor"/><circle cx="8" cy="2" r="1.6" fill="currentColor"/><circle cx="14" cy="2" r="1.6" fill="currentColor"/></svg></span></div>
+          <div class="screen"><div class="g g--m" data-game></div></div>
+        </div>
+        <div class="frame-cap">Mobile · vue de jeu</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Données réelles du 2026-11-18 (generateCipher('2026-11-18')) : "rzuf qzskbki" = "cold morning".
+   Indices donnés par le jeu : r→c, z→o, u→l. Le joueur a posé s→r, k→n. Sélection : f. */
+const MSG='rzuf qzskbki', GIVEN={r:'c',z:'o',u:'l'}, MINE={s:'r',k:'n'}, SEL='f';
+const MAP={...GIVEN,...MINE};
+const uniq=[...new Set(MSG.replace(/ /g,''))];
+const bits=c=>{const n=c.charCodeAt(0)-96;return [16,8,4,2,1].map(b=>n&b?1:0)};
+
+function game(){
+  const set=uniq.filter(c=>MAP[c]).length;
+  let tape='';
+  for(const c of MSG){
+    if(c===' '){tape+='<div class="col gap"><div class="holes">'+'<i></i>'.repeat(3)+'<i class="fh"></i>'+'<i></i>'.repeat(2)+'</div><div class="ct">.</div><div class="slot"></div></div>';continue}
+    const b=bits(c);
+    const h=b.slice(0,3).map(x=>`<i class="${x?'p':''}"></i>`).join('')+'<i class="fh"></i>'+b.slice(3).map(x=>`<i class="${x?'p':''}"></i>`).join('');
+    const cls=c===SEL?'sel':GIVEN[c]?'given':MINE[c]?'':'empty';
+    tape+=`<div class="col ${c===SEL?'sel':''}"><div class="holes">${h}</div><div class="ct">${c}</div><div class="slot ${cls}">${MAP[c]||''}</div></div>`;
+  }
+  const inv={};for(const k in MAP)inv[MAP[k]]=k;
+  const rows=['abcdefghi','jklmnopqr','stuvwxyz'].map(r=>'<div class="row">'+[...r].map(l=>{
+    const by=inv[l];const cls=by?(GIVEN[by]?'given':'used'):'';
+    return `<span class="k ${cls}">${l}${by?`<sub>${by}</sub>`:''}</span>`}).join('')+'</div>').join('');
+  return `
+  <div class="g-head"><span class="wm">DECRYPTAGE<em>.</em></span>
+    <span class="stats"><span>time <b>01:42</b></span><span class="streak">streak <b>6</b><span class="h">${'<i class="p"></i>'.repeat(6)}<i class="today"></i></span></span></span></div>
+  <div class="g-rule"><span class="d">Intercept · 18 Nov 2026</span>Each letter stands for <b>exactly one other</b>. Tap a letter on the tape, then pick its match.</div>
+  <div class="deck"><div class="tape">${tape}</div></div>
+  <div class="under"><span class="keys">Given${Object.entries(GIVEN).map(([a,b])=>`<span>${a}<b>=</b>${b}</span>`).join('')}</span><span>${set} / ${uniq.length} set</span></div>
+  <div class="pad">
+    <div class="pad-h"><span>substitution</span><b>${SEL.toUpperCase()} <em>=</em> ?</b><span>pick a letter</span></div>
+    <div class="rows">${rows}</div>
+    <div class="go"><span class="btn ghost">Clear</span><span class="btn main">Decrypt<span>${uniq.length-set} left</span></span></div>
+  </div>`;
+}
+document.querySelectorAll('[data-game]').forEach(el=>el.innerHTML=game());
+
+/* mise à l'échelle de la planche */
+let real=false;const st=document.getElementById('stage'),fr=document.getElementById('frames');
+function fit(){const s=real?1:Math.min(1,st.clientWidth/1878);fr.style.transform=`scale(${s})`;st.style.height=(900+24)*s+'px'}
+document.getElementById('zoom').onclick=e=>{real=!real;e.target.textContent=real?'Ajuster':'Taille réelle';st.style.overflow=real?'auto':'hidden';fit()};
+addEventListener('resize',fit);fit();
+</script>
+</body>
+</html>

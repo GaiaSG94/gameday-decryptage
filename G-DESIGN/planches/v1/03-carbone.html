@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Décryptage · V1 · 03 Carbone</title>
+<style>
+/* ============ Planche (neutre, identique sur les 3 directions) ============ */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#e4e3df;color:#1b1b1a;font:13px/1.45 "Helvetica Neue",Helvetica,Arial,"Liberation Sans",sans-serif}
+.board{padding:28px 32px 40px}
+.meta{display:grid;grid-template-columns:260px 1fr 300px 320px;gap:32px;border-top:1px solid #1b1b1a;padding-top:14px;margin-bottom:28px}
+.meta h1{font-size:28px;font-weight:400;letter-spacing:-.02em;line-height:1.05}
+.meta h1 small{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#77756f;margin-bottom:8px}
+.meta h2{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#77756f;margin-bottom:8px}
+.meta p{max-width:58ch}
+.sw{display:flex;gap:6px;flex-wrap:wrap}
+.sw div{width:64px;font:10px/1.3 ui-monospace,"IBM Plex Mono","DejaVu Sans Mono",monospace;color:#55534e}
+.sw i{display:block;height:40px;border:1px solid rgba(0,0,0,.12);margin-bottom:4px}
+.spec{font-size:11px;color:#55534e}
+.spec b{display:block;font-weight:400;color:#1b1b1a}
+.legend{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}
+.legend figure{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10px;color:#55534e}
+.stagebar{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;color:#77756f;margin-bottom:10px}
+.stagebar button{font:inherit;color:#1b1b1a;background:none;border:1px solid #1b1b1a;border-radius:99px;padding:3px 10px;cursor:pointer}
+.stage{position:relative;overflow:hidden}
+.frames{display:flex;gap:48px;align-items:flex-start;transform-origin:0 0;width:1878px}
+.frame-cap{font-size:11px;color:#77756f;margin-top:8px}
+
+/* ============ Chrome Reddit neutre (pas de logo, pas de marque) ============ */
+.desk{width:1440px;height:900px;background:#fff;position:relative;overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.08),0 20px 50px -20px rgba(0,0,0,.25);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:#1c1c1c}
+.desk .top{height:56px;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;gap:16px;padding:0 20px}
+.ph-dot{width:32px;height:32px;border-radius:50%;background:#e7e7e5}
+.ph-bar{height:10px;border-radius:5px;background:#e7e7e5}
+.search{flex:0 0 560px;margin:0 auto;height:38px;border-radius:19px;background:#f1f1ef;display:flex;align-items:center;padding:0 16px;color:#8a8a85;font-size:14px}
+.desk .body{display:grid;grid-template-columns:272px 1fr 316px;height:844px}
+.rail{border-right:1px solid #e5e5e5;padding:18px 16px;display:flex;flex-direction:column;gap:14px;font-size:14px;color:#3c3c3c}
+.rail .sep{height:1px;background:#e5e5e5;margin:4px 0}
+.rail .cap{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8a8a85}
+.feed{padding:16px 0;display:flex;justify-content:center}
+.post{width:756px;padding:10px 16px;border-radius:12px}
+.post .ph{display:flex;align-items:center;gap:8px;font-size:12px;color:#5c5c5c}
+.post .ph .av{width:24px;height:24px;border-radius:50%}
+.post .ph b{color:#1c1c1c;font-weight:600}
+.post h3{font-size:18px;font-weight:600;margin:8px 0 10px;letter-spacing:-.01em}
+.embed{width:724px;height:640px;border-radius:10px;overflow:hidden;position:relative;border:1px solid #e5e5e5}
+.acts{display:flex;gap:8px;margin-top:10px}
+.pill{height:32px;border-radius:16px;background:#f1f1ef;display:flex;align-items:center;gap:8px;padding:0 12px;font-size:12px;font-weight:600;color:#3c3c3c}
+.pill svg{width:14px;height:14px}
+.side{padding:16px 20px}
+.card{border-radius:12px;background:#f6f6f4;padding:14px;font-size:12px;color:#3c3c3c;display:flex;flex-direction:column;gap:8px}
+.card b{font-size:14px;color:#1c1c1c}
+.mob{width:390px;height:844px;background:#000;border-radius:44px;padding:0;position:relative;overflow:hidden;box-shadow:0 20px 50px -20px rgba(0,0,0,.35);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
+.mob .status{height:44px;display:flex;justify-content:space-between;align-items:center;padding:0 28px 0 34px;font-size:15px;font-weight:600}
+.mob .bar{height:48px;display:flex;align-items:center;gap:12px;padding:0 14px;font-size:13px}
+.mob .bar .x{width:28px;height:28px;border-radius:50%;display:grid;place-items:center}
+.mob .bar .t{flex:1;line-height:1.15}
+.mob .bar .t b{display:block;font-size:14px}
+.mob .screen{position:absolute;left:0;right:0;top:92px;bottom:0}
+
+/* ============ DIRECTION 03 — CARBONE (écart assumé) ============ */
+:root{
+  --bg:#f4f4f1; --ink:#0f0f0f; --grey:rgba(15,15,15,.45); --faint:rgba(15,15,15,.18); --hair:#d9d9d4;
+  --blue:#2b3bff; --av:#0f0f0f;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,"DejaVu Sans Mono",monospace;
+  --sans:"Inter","Helvetica Neue",Helvetica,Arial,"Liberation Sans",sans-serif;
+}
+.mob{background:var(--bg)}
+.mob .status,.mob .bar{color:var(--ink)}
+.mob .bar{border-bottom:1px solid var(--hair)}
+.mob .bar .t span{color:var(--grey);font-size:12px}
+
+.g{position:absolute;inset:0;background:var(--bg);color:var(--ink);font-family:var(--sans);display:flex;flex-direction:column;padding:var(--pad);
+}
+.top{display:flex;justify-content:space-between;align-items:flex-start}
+.date{display:flex;align-items:flex-start;gap:10px}
+.date b{font:400 var(--dfs)/.8 var(--sans);letter-spacing:-.05em}
+.date span{font:500 10px/1.35 var(--sans);letter-spacing:.08em;text-transform:uppercase;padding-top:2px}
+.date span i{font-style:normal;color:var(--grey);display:block}
+.rows-d{display:flex;flex-direction:column;gap:5px;min-width:118px}
+.rows-d div{display:flex;justify-content:space-between;gap:16px;font-size:11px;color:var(--grey)}
+.rows-d b{font:500 12px/1 var(--mono);color:var(--ink)}
+.rule{font-size:var(--rfs);line-height:1.25;letter-spacing:-.01em;margin-top:var(--rm);max-width:22ch}
+.rule i{font-style:normal;color:var(--grey)}
+
+.msg{margin:auto 0;display:flex;flex-direction:var(--md);gap:var(--wg)}
+.word{display:flex;border-top:1px solid var(--ink)}
+.c{width:var(--col);display:flex;flex-direction:column;border-right:1px solid var(--hair);padding:6px 0 0 6px;position:relative}
+.c:first-child{border-left:1px solid var(--hair)}
+.c .x{font:500 11px/1 var(--mono);text-transform:uppercase;color:var(--grey);display:flex;align-items:center;gap:4px}
+.c .x:before{content:"";width:1px;height:6px;background:currentColor}
+.c .p{font:400 var(--pfs)/1 var(--sans);letter-spacing:-.04em;text-transform:uppercase;height:var(--ph);display:flex;align-items:flex-end;padding-bottom:6px}
+.c.given .p{color:var(--ink)}
+.c.mine .p{color:var(--blue)}
+.c.empty .p:after{content:"";width:calc(var(--col) - 18px);height:1px;background:var(--faint);margin-bottom:4px}
+.c.sel{background:var(--blue)}
+.c.sel .x{color:#fff}
+.c.sel .p:after{content:"";width:2px;height:70%;background:#fff;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+.pad{margin-top:0}
+.pad-h{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--ink);padding-top:8px;margin-bottom:8px;font-size:11px;color:var(--grey)}
+.pad-h b{font:400 15px/1 var(--sans);color:var(--ink)}
+.pad-h b em{font-style:normal;color:var(--blue)}
+.keys{display:grid;grid-template-columns:repeat(var(--kc),1fr);border-left:1px solid var(--hair);border-top:1px solid var(--hair)}
+.k{height:var(--kh);border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);display:flex;align-items:center;justify-content:center;position:relative;
+  font:400 19px/1 var(--sans);text-transform:uppercase;background:var(--bg)}
+.k sub{position:absolute;top:5px;left:6px;font:500 9px/1 var(--mono);text-transform:uppercase;color:var(--blue)}
+.k.used,.k.given{color:var(--faint)}
+.k.given sub{color:var(--grey)}
+.go{display:flex;gap:8px;margin-top:12px}
+.btn{height:50px;border-radius:25px;display:flex;align-items:center;justify-content:center;gap:10px;font:500 15px/1 var(--sans)}
+.btn.ghost{flex:0 0 92px;border:1px solid var(--ink)}
+.btn.main{flex:1;background:var(--ink);color:var(--bg)}
+.btn.main span{font:500 12px/1 var(--mono);opacity:.55}
+
+.g--m{--pad:18px 16px 30px;--gc:6;--gx:16px;--dfs:56px;--rfs:20px;--rm:18px;--md:column;--wg:18px;--col:51px;--ph:64px;--pfs:46px;--kc:9;--kh:46px}
+.g--m .msg{align-items:flex-start}
+.g--d{--pad:24px 28px 24px;--gc:12;--gx:28px;--dfs:64px;--rfs:22px;--rm:18px;--md:row;--wg:52px;--col:52px;--ph:62px;--pfs:48px;--kc:13;--kh:44px}
+.g--d .msg{justify-content:center;margin:auto 0}
+.g--d .pad{margin-top:0}
+.g--d .go{max-width:420px;margin:14px auto 0}
+@media (prefers-reduced-motion:reduce){.c.sel .p:after{animation:none}}
+</style>
+</head>
+<body>
+<div class="board">
+
+  <section class="meta">
+    <div>
+      <h1><small>Décryptage · V1 · page Jeu · 2026-11-18</small>03 — Carbone <span style="font-size:13px;color:#77756f">(écart)</span></h1>
+    </div>
+    <div>
+      <h2>Pourquoi</h2>
+      <p>Les messages font deux mots : on peut donc écrire les lettres en très grand et lire tout le défi d'un coup d'œil sur un téléphone, sans texture ni objet à décoder d'abord. Pas de décor « espionnage » : l'intrigue vient de l'encre bleue de papier carbone qui remplit le message lettre après lettre, et de la grille fine qui fait « instrument de mesure ». C'est la direction qui fait le plus « produit lancé » et qui vieillira le mieux sur 30 jours, au prix d'une ambiance moins marquée que la 01.</p>
+    </div>
+    <div>
+      <h2>Palette · un seul accent</h2>
+      <div class="sw">
+        <div><i style="background:#f4f4f1"></i>Papier<br>#f4f4f1</div>
+        <div><i style="background:#d9d9d4"></i>Filet<br>#d9d9d4</div>
+        <div><i style="background:#0f0f0f"></i>Encre<br>#0f0f0f</div>
+        <div><i style="background:rgba(15,15,15,.45)"></i>Gris<br>encre 45 %</div>
+        <div><i style="background:#2b3bff"></i>Carbone<br>#2b3bff</div>
+      </div>
+      <h2 style="margin-top:14px">Typo</h2>
+      <div class="spec"><b style="font:400 30px/1.1 Inter,'Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-.04em">COL<span style="color:#2b3bff">D</span> MORNING</b>Sans (Inter, OFL), une seule graisse : lettres en clair, consignes<br><b style="font:500 13px/1.4 'IBM Plex Mono',ui-monospace,monospace;margin-top:6px">R Z U F · 01:42</b>Mono (IBM Plex Mono, OFL) : lettres chiffrées, compteurs</div>
+    </div>
+    <div>
+      <h2>États d'une lettre</h2>
+      <div class="legend" style="--col:46px;--ph:48px;--pfs:36px">
+        <figure><div class="word" style="border:0"><div class="c empty" style="border-left:1px solid #d9d9d4"><div class="x">b</div><div class="p"></div></div></div>vide</figure>
+        <figure><div class="word" style="border:0"><div class="c given" style="border-left:1px solid #d9d9d4"><div class="x">r</div><div class="p">C</div></div></div>donnée</figure>
+        <figure><div class="word" style="border:0"><div class="c mine" style="border-left:1px solid #d9d9d4"><div class="x">s</div><div class="p">R</div></div></div>posée</figure>
+        <figure><div class="word" style="border:0"><div class="c sel"><div class="x">f</div><div class="p"></div></div></div>sélection</figure>
+      </div>
+      <p class="spec" style="margin-top:10px">Noir = donné par l'intercept, bleu carbone = posé par le joueur. Une seule surface pleine par écran : la case sélectionnée (bleu) et le bouton « Decrypt » (noir).</p>
+    </div>
+  </section>
+
+  <div class="stagebar"><span>Desktop 1440 × 900 (post dans le feed, zone de jeu 724 × 640) · Mobile 390 × 844 (vue de jeu plein écran)</span><button id="zoom">Taille réelle</button></div>
+  <div class="stage" id="stage">
+    <div class="frames" id="frames">
+      <div>
+        <div class="desk">
+          <div class="top"><div class="ph-dot"></div><div class="ph-bar" style="width:72px"></div><div class="search">Search</div><div class="ph-dot"></div><div class="ph-dot"></div></div>
+          <div class="body">
+            <aside class="rail"><span>Home</span><span>Popular</span><span>Explore</span><div class="sep"></div><span class="cap">Communities</span><span>r/decryptage</span><span style="color:#8a8a85">r/wordgames</span><span style="color:#8a8a85">r/puzzles</span></aside>
+            <main class="feed">
+              <article class="post">
+                <div class="ph"><span class="av" style="background:var(--av)"></span><b>r/decryptage</b><span>· 3 h</span></div>
+                <h3>Today's intercept · 18 Nov</h3>
+                <div class="embed"><div class="g g--d" data-game></div></div>
+                <div class="acts">
+                  <span class="pill"><svg viewBox="0 0 14 14"><path d="M7 2 12 8H9v4H5V8H2z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>1.2k<svg viewBox="0 0 14 14"><path d="M7 12 2 6h3V2h4v4h3z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>
+                  <span class="pill"><svg viewBox="0 0 14 14"><path d="M2 3h10v7H6l-3 2v-2H2z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>214</span>
+                  <span class="pill">Share</span>
+                </div>
+              </article>
+            </main>
+            <aside class="side"><div class="card"><b>r/decryptage</b>One intercepted message a day. Same cipher for everyone.<div class="ph-bar" style="width:60%"></div></div></aside>
+          </div>
+        </div>
+        <div class="frame-cap">Desktop · post dans le feed</div>
+      </div>
+      <div>
+        <div class="mob">
+          <div class="status"><span>9:41</span><span style="display:flex;gap:4px;align-items:flex-end"><i style="width:3px;height:5px;background:currentColor"></i><i style="width:3px;height:7px;background:currentColor"></i><i style="width:3px;height:9px;background:currentColor"></i><i style="width:3px;height:11px;background:currentColor"></i><i style="width:22px;height:11px;border:1.5px solid currentColor;border-radius:3px;margin-left:6px"></i></span></div>
+          <div class="bar"><span class="x"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 2l10 10M12 2 2 12" stroke="currentColor" stroke-width="1.6"/></svg></span><span class="t"><b>Today's intercept · 18 Nov</b><span>r/decryptage</span></span><span class="x"><svg width="16" height="4" viewBox="0 0 16 4"><circle cx="2" cy="2" r="1.6" fill="currentColor"/><circle cx="8" cy="2" r="1.6" fill="currentColor"/><circle cx="14" cy="2" r="1.6" fill="currentColor"/></svg></span></div>
+          <div class="screen"><div class="g g--m" data-game></div></div>
+        </div>
+        <div class="frame-cap">Mobile · vue de jeu</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Données réelles du 2026-11-18 (generateCipher('2026-11-18')) : "rzuf qzskbki" = "cold morning".
+   Indices donnés par le jeu : r→c, z→o, u→l. Le joueur a posé s→r, k→n. Sélection : f. */
+const MSG='rzuf qzskbki', GIVEN={r:'c',z:'o',u:'l'}, MINE={s:'r',k:'n'}, SEL='f';
+const MAP={...GIVEN,...MINE};
+const uniq=[...new Set(MSG.replace(/ /g,''))];
+const AL='abcdefghijklmnopqrstuvwxyz';
+
+function game(mode){
+  const set=uniq.filter(c=>MAP[c]).length;
+  const st=c=>c===SEL?'sel':GIVEN[c]?'given':MINE[c]?'mine':'empty';
+  const msg=MSG.split(' ').map(w=>'<div class="word">'+[...w].map(c=>`<div class="c ${st(c)}"><div class="x">${c}</div><div class="p">${MAP[c]||''}</div></div>`).join('')+'</div>').join('');
+  const inv={};for(const k in MAP)inv[MAP[k]]=k;
+  const keys=[...AL].map(l=>{const by=inv[l];const cls=by?(GIVEN[by]?'given':'used'):'';return `<span class="k ${cls}">${l}${by?`<sub>${by}</sub>`:''}</span>`}).join('');
+  return `
+  <div class="top">
+    <div class="date"><b>18</b><span>Nov 2026<i>Intercept</i><i>Decryptage</i></span></div>
+    <div class="rows-d"><div>Time<b>01:42</b></div><div>Streak<b>06</b></div><div>Set<b>0${set}/0${uniq.length}</b></div></div>
+  </div>
+  <p class="rule">Each letter stands for exactly one other. <i>Tap a letter, then pick its match.</i></p>
+  <div class="msg">${msg}</div>
+  <div class="pad">
+    <div class="pad-h"><span>Pick a letter for</span><b>${SEL.toUpperCase()} <em>&rarr;</em> ?</b></div>
+    <div class="keys">${keys}</div>
+    <div class="go"><span class="btn ghost">Clear</span><span class="btn main">Decrypt<span>${uniq.length-set} left</span></span></div>
+  </div>`;
+}
+document.querySelectorAll('[data-game]').forEach(el=>el.innerHTML=game(el.classList.contains('g--m')?'m':'d'));
+
+/* mise à l'échelle de la planche */
+let real=false;const st=document.getElementById('stage'),fr=document.getElementById('frames');
+function fit(){const s=real?1:Math.min(1,st.clientWidth/1878);fr.style.transform=`scale(${s})`;st.style.height=(900+24)*s+'px'}
+document.getElementById('zoom').onclick=e=>{real=!real;e.target.textContent=real?'Ajuster':'Taille réelle';st.style.overflow=real?'auto':'hidden';fit()};
+addEventListener('resize',fit);fit();
+</script>
+</body>
+</html>
